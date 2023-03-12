@@ -1,0 +1,84 @@
+# cd desktop/cadastro
+# docker-compose up -d --build
+
+version: "3"
+services:
+  postgres:
+    image: postgres:14.5
+    container_name: "secure-password-postgresql"      
+    environment:
+      POSTGRES_DB: secure_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: America/Sao_Paulo
+    volumes:
+      - ./db_volume:/var/lib/postgresql/data
+    ports:
+      - 5432:5432  
+    networks:
+      - postgres-secure-password-network
+
+
+
+#  apache:
+#    image: 'php:8.1-rc-apache'
+#    container_name: secure-password-apache
+#    restart: always
+#    ports:
+#      - '8080:80'
+#    volumes:
+#      - ./secure-password-app:/var/www/html
+#    depends_on:
+#      - pgadmin
+#    links:
+#      - pgadmin      
+  
+  
+  
+  
+  apache:
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    container_name: secure-password-apache
+    restart: always
+    ports:
+      - '80:80'
+    volumes:
+      - ./secure-password-app:/var/www/html
+    depends_on:
+      - pgadmin
+    links:
+      - pgadmin      
+      
+      
+      
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: "secure-password-pgadmin4"  
+    restart: always
+    tty: false
+    stdin_open: false
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "desenvolvimento@kosmoscience.com"
+      PGADMIN_DEFAULT_PASSWORD: "postgres"
+    ports:
+      - "16543:80"
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+      - ./pgpass:/pgpass
+    depends_on:
+      - postgres
+    networks:
+      - postgres-secure-password-network
+
+
+  
+#### docker volume create db_volume
+volumes:
+  db_volume:
+    external: true      
+
+networks: 
+  postgres-secure-password-network:
+    driver: bridge
