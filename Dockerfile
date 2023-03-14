@@ -1,10 +1,15 @@
 FROM php:8.1-rc-apache
 
 ARG uid=1000
-ARG user=admin
+ARG user=josel
 ARG gitproject=https://github.com/Joselacerdajunior/secure-password-app.git
 ARG gitprojectwget=https://github.com/Joselacerdajunior/secure-password-app/archive/9fe44f627f3cafebe1c7564e4e9715cc9b998664.zip
 ARG gitprojectname=secure-password-app
+ARG projectpath=/var/www/html/${gitprojectname}
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/${gitprojectname}/public
+
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -33,52 +38,12 @@ RUN wget ${gitprojectwget} -O ${gitprojectname}.zip && \
     cd ${gitprojectname} && \
     cp .env.example .env && \
     composer install && \
-    php artisan key:generate
+    php artisan key:generate && \
+    cd ../html && \
+    cp -r ../${gitprojectname} ./ && \
+    chmod -R 775 ${projectpath}
+
+
+WORKDIR /var/www
 
 USER ${user}
-
-
-
-
-
-
-
-
-#RUN chown -R www-data:www-data /var/www/html && \
-#    chmod -R 774 /var/www/html
-#RUN chown -R www-data:www-data /var/www && \
-#    chmod -R 777 /var/www
-#RUN chown -R www-data:www-data /var && \
-#    chmod -R 775 /var
-#RUN git clone ${gitproject}
-
-    #cd html && \
-    #cp -rp ../${gitprojectname} ./
-
-
-#RUN mv ./.git* ../ && \
-#    mv ./.env* ../ && \
-#    mv ./.editor* ../ && \
-#    mv ./* ../
-
-#RUN cd .. && \
-#    rmdir ${gitprojectname} && \
-#    cp .env.example .env && \
-#    composer install && \
-#    php artisan key:generate
-
-
-
-
-
-#Go to the following locations and change the root folder, into a local folder in your Desktop.
-#   a) /etc/apache2/sites-available/000-default.conf
-#         Change "DocumentRoot /var/www/html"
-#
-#   b) /etc/apache2/apache2.conf
-#         Find "<Directory /var/www/html/>
-#                 Options Indexes FollowSymLinks
-#                 AllowOverride None
-#                 Require all granted
-#               </Directory>"
-#         And change "/var/www/html"

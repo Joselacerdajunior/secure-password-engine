@@ -37,8 +37,8 @@ services:
     restart: always
     ports:
       - '80:80'
-    volumes:
-      - ./secure-password-app:/var/www/html
+    #volumes:
+    #  - ./secure-password-app:/var/www/html
     depends_on:
       - pgadmin
     links:
