@@ -40,16 +40,29 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-RUN wget ${GIT_WGET_PATH} -O ${PROJECT_NAME}.zip && \
-    unzip ${PROJECT_NAME}.zip && \
-    rm -rf ${PROJECT_NAME}.zip && \
-    mv ${PROJECT_NAME}* ${PROJECT_NAME} && \
+#RUN wget ${GIT_WGET_PATH} -O ${PROJECT_NAME}.zip && \
+#    unzip ${PROJECT_NAME}.zip && \
+#    rm -rf ${PROJECT_NAME}.zip && \
+#    mv ${PROJECT_NAME}* ${PROJECT_NAME} && \
+#    cd ${PROJECT_NAME} && \
+#    cp .env.example .env && \
+#    composer install && \
+#    php artisan key:generate && \
+#    cd ../html && \
+#    rm -rf ../${PROJECT_NAME} && \
+#    cp -r ../${PROJECT_NAME} ./ && \
+#    chmod -R 775 ${PROJECT_PATH}
+	
+
+RUN cd html && \
+	git clone ${GIT_GIT} && \
     cd ${PROJECT_NAME} && \
+	git pull && \
+	git config --global --add safe.directory /var/www/html/${PROJECT_NAME} && \
+	git config --global pull.ff only && \
     cp .env.example .env && \
     composer install && \
     php artisan key:generate && \
-    cd ../html && \
-    cp -r ../${PROJECT_NAME} ./ && \
     chmod -R 775 ${PROJECT_PATH}
 
 WORKDIR /var/www
