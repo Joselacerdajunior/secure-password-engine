@@ -4,3 +4,6 @@
     docker compose up -d
   or if you need compile log
     docker_buildkit=0 docker compose up -d
+
+
+# TO BUILD RUN "docker compose build"
