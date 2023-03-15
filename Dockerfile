@@ -2,12 +2,12 @@ FROM php:8.1-rc-apache
 
 ARG UID=1000
 ARG USER=josel
-ARG GIT_GIT=https://github.com/Joselacerdajunior/secure-password-app.git
+ARG GITHUB_PROJECT_URL=https://github.com/Joselacerdajunior/secure-password-app.git
 ARG GIT_WGET_PATH=https://github.com/Joselacerdajunior/secure-password-app/archive/9fe44f627f3cafebe1c7564e4e9715cc9b998664.zip
-ARG PROJECT_NAME=secure-password-app
-ARG PROJECT_PATH=/var/www/html/${PROJECT_NAME}
+ARG GITHUB_PROJECT_NAME=secure-password-app
+ARG PROJECT_PATH=/var/www/html/${GITHUB_PROJECT_NAME}
 
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/${PROJECT_NAME}/public
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/${GITHUB_PROJECT_NAME}/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf && \
     sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
@@ -40,31 +40,31 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-#RUN wget ${GIT_WGET_PATH} -O ${PROJECT_NAME}.zip && \
-#    unzip ${PROJECT_NAME}.zip && \
-#    rm -rf ${PROJECT_NAME}.zip && \
-#    mv ${PROJECT_NAME}* ${PROJECT_NAME} && \
-#    cd ${PROJECT_NAME} && \
+#RUN wget ${GIT_WGET_PATH} -O ${GITHUB_PROJECT_NAME}.zip && \
+#    unzip ${GITHUB_PROJECT_NAME}.zip && \
+#    rm -rf ${GITHUB_PROJECT_NAME}.zip && \
+#    mv ${GITHUB_PROJECT_NAME}* ${GITHUB_PROJECT_NAME} && \
+#    cd ${GITHUB_PROJECT_NAME} && \
 #    cp .env.example .env && \
 #    composer install && \
 #    php artisan key:generate && \
 #    cd ../html && \
-#    rm -rf ../${PROJECT_NAME} && \
-#    cp -r ../${PROJECT_NAME} ./ && \
+#    rm -rf ../${GITHUB_PROJECT_NAME} && \
+#    cp -r ../${GITHUB_PROJECT_NAME} ./ && \
 #    chmod -R 775 ${PROJECT_PATH}
 	
 
 RUN cd html && \
-	git clone ${GIT_GIT} && \
-    cd ${PROJECT_NAME} && \
+	git clone ${GITHUB_PROJECT_URL} && \
+    cd ${GITHUB_PROJECT_NAME} && \
 	git pull && \
-	git config --global --add safe.directory /var/www/html/${PROJECT_NAME} && \
+	git config --global --add safe.directory /var/www/html/${GITHUB_PROJECT_NAME} && \
 	git config --global pull.ff only && \
     cp .env.example .env && \
     composer install && \
     php artisan key:generate && \
     chmod -R 775 ${PROJECT_PATH}
 
-WORKDIR /var/www
+WORKDIR /var/www/html
 
 USER ${USER}

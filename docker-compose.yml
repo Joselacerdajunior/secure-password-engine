@@ -2,8 +2,8 @@ version: "3"
 name: secure-password
 services:
   postgres:
-    image: postgres:14.5
     container_name: "postgresql"      
+    image: postgres:14.5
     environment:
       POSTGRES_DB: secure_password
       POSTGRES_USER: postgres
@@ -16,37 +16,9 @@ services:
     networks:
       - postgres-secure-password-network
 
-#  apache:
-#    image: 'php:8.1-rc-apache'
-#    container_name: apache
-#    restart: always
-#    ports:
-#      - '80:80'
-#    volumes:
-#      - ./secure-password-app:/var/www/html
-#    depends_on:
-#      - pgadmin
-#    links:
-#      - pgadmin      
-
-  apache:
-    build: 
-      context: ./
-      dockerfile: Dockerfile
-    container_name: apache
-    restart: always
-    ports:
-      - '80:80'
-    #volumes:
-    #  - ./secure-password-app:/var/www/html
-    depends_on:
-      - pgadmin
-    links:
-      - pgadmin      
-
   pgadmin:
-    image: dpage/pgadmin4
     container_name: "pgadmin4"  
+    image: dpage/pgadmin4
     restart: always
     tty: false
     stdin_open: false
@@ -62,6 +34,19 @@ services:
       - postgres
     networks:
       - postgres-secure-password-network
+
+  apache:
+    container_name: phpapache
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '80:80'
+    depends_on:
+      - pgadmin
+    links:
+      - pgadmin      
 
 volumes:
   db_volume:
