@@ -35,6 +35,21 @@ services:
     networks:
       - postgres-secure-password-network
 
+  metabase:    
+    image: metabase/metabase:latest
+    container_name: metabase
+    environment:            
+      - MB_DB_TYPE=postgres
+      - MB_DB_DBNAME=app
+      - MB_DB_PORT=5432
+      - MB_DB_USER=postgres
+      - MB_DB_PASS=postgres
+      - MB_DB_HOST=postgres
+    ports:      
+      - 3002:3000
+    networks:
+      - postgres-secure-password-network
+    
   apache:
     container_name: phpapache
     build: 
