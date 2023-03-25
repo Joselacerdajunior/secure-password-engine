@@ -1,0 +1,73 @@
+version: "3"
+name: secure-password
+services:
+  postgres:
+    container_name: "postgresql"      
+    image: postgres:14.5
+    environment:
+      POSTGRES_DB: secure_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: America/Sao_Paulo
+    volumes:
+      - ./db_volume:/var/lib/postgresql/data
+      - ./create_metabase_database.sql:/docker-entrypoint-initdb.d/create_metabase_database.sql
+    ports:
+      - 5432:5432  
+    networks:
+      - postgres-secure-password-network
+
+  pgadmin:
+    container_name: "pgadmin4"  
+    image: dpage/pgadmin4
+    restart: always
+    tty: false
+    stdin_open: false
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "desenvolvimento@kosmoscience.com"
+      PGADMIN_DEFAULT_PASSWORD: "postgres"
+    ports:
+      - "16543:80"
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+      - ./pgpass:/pgpass
+    depends_on:
+      - postgres
+    networks:
+      - postgres-secure-password-network
+
+  metabase:    
+    image: metabase/metabase:latest
+    container_name: metabase
+    environment:            
+      - MB_DB_TYPE=postgres
+      - MB_DB_DBNAME=metabase
+      - MB_DB_PORT=5432
+      - MB_DB_USER=postgres
+      - MB_DB_PASS=postgres
+      - MB_DB_HOST=postgres
+    ports:      
+      - 3002:3000
+    networks:
+      - postgres-secure-password-network
+    
+  apache:
+    container_name: phpapache
+    build: 
+      context: ./DockerfileApache
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '80:80'
+    depends_on:
+      - pgadmin
+    links:
+      - pgadmin      
+
+volumes:
+  db_volume:
+    external: true      
+
+networks: 
+  postgres-secure-password-network:
+    driver: bridge
