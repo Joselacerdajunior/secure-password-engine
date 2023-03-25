@@ -2,35 +2,35 @@ version: "3"
 name: secure-password
 services:
   postgres:
-    container_name: "postgresql"      
+    container_name: postgresql      
     image: postgres:14.5
     environment:
-      POSTGRES_DB: secure_password
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      TZ: America/Sao_Paulo
+      POSTGRES_DB: ${ENV_POSTGRES_DB}
+      POSTGRES_USER: ${ENV_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${ENV_POSTGRES_PASSWORD}
+      TZ: ${ENV_TZ}
     volumes:
       - ./db_volume:/var/lib/postgresql/data
-      - ./create_metabase_database.sql:/docker-entrypoint-initdb.d/create_metabase_database.sql
+      - ./ConfigPostgreSQL/create_metabase_database.sql:/docker-entrypoint-initdb.d/create_metabase_database.sql
     ports:
-      - 5432:5432  
+      - ${ENV_POSTGRES_PORTS}
     networks:
       - postgres-secure-password-network
 
   pgadmin:
-    container_name: "pgadmin4"  
+    container_name: pgadmin4  
     image: dpage/pgadmin4
     restart: always
     tty: false
     stdin_open: false
     environment:
-      PGADMIN_DEFAULT_EMAIL: "desenvolvimento@kosmoscience.com"
-      PGADMIN_DEFAULT_PASSWORD: "postgres"
+      PGADMIN_DEFAULT_EMAIL: ${ENV_PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${ENV_PGADMIN_DEFAULT_PASSWORD}
     ports:
-      - "16543:80"
+      - ${ENV_PGADMIN_PORTS}
     volumes:
-      - ./servers.json:/pgadmin4/servers.json
-      - ./pgpass:/pgpass
+      - ./ConfigPgAdmin/servers.json:/pgadmin4/servers.json
+      - ./ConfigPgAdmin/pgpass:/pgpass
     depends_on:
       - postgres
     networks:
@@ -40,29 +40,38 @@ services:
     image: metabase/metabase:latest
     container_name: metabase
     environment:            
-      - MB_DB_TYPE=postgres
-      - MB_DB_DBNAME=metabase
-      - MB_DB_PORT=5432
-      - MB_DB_USER=postgres
-      - MB_DB_PASS=postgres
-      - MB_DB_HOST=postgres
+      MB_DB_TYPE: ${ENV_MB_DB_TYPE}
+      MB_DB_DBNAME: ${ENV_MB_DB_DBNAME}
+      MB_DB_PORT: ${ENV_MB_DB_PORT}
+      MB_DB_USER: ${ENV_MB_DB_USER}
+      MB_DB_PASS: ${ENV_MB_DB_PASS}
+      MB_DB_HOST: ${ENV_MB_DB_HOST}
     ports:      
-      - 3002:3000
+      - ${ENV_METABASE_PORTS}
     networks:
       - postgres-secure-password-network
     
   apache:
     container_name: phpapache
     build: 
-      context: ./DockerfileApache
-      dockerfile: Dockerfile
+      context: ./ConfigApache
+      args:
+        UID: ${ENV_UID}
+        USER: ${ENV_USER}
+        GITHUB_PROJECT_URL: ${ENV_GITHUB_PROJECT_URL}
+        GIT_WGET_PATH: ${ENV_GIT_WGET_PATH}
+        GITHUB_PROJECT_NAME: ${ENV_GITHUB_PROJECT_NAME}
+        PROJECT_PATH: ${ENV_PROJECT_PATH}
+      dockerfile: Dockerfile        
     restart: always
     ports:
-      - '80:80'
+      - ${ENV_APACHE_PORTS}
     depends_on:
       - pgadmin
     links:
-      - pgadmin      
+      - pgadmin 
+    networks:
+      - postgres-secure-password-network
 
 volumes:
   db_volume:

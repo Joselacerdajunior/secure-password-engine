@@ -1,11 +1,11 @@
 FROM php:8.1-rc-apache
 
-ARG UID=1000
-ARG USER=josel
-ARG GITHUB_PROJECT_URL=https://github.com/Joselacerdajunior/secure-password-app.git
-ARG GIT_WGET_PATH=https://github.com/Joselacerdajunior/secure-password-app/archive/9fe44f627f3cafebe1c7564e4e9715cc9b998664.zip
-ARG GITHUB_PROJECT_NAME=secure-password-app
-ARG PROJECT_PATH=/var/www/html/${GITHUB_PROJECT_NAME}
+ARG UID
+ARG USER
+ARG GITHUB_PROJECT_URL
+ARG GIT_WGET_PATH
+ARG GITHUB_PROJECT_NAME
+ARG PROJECT_PATH
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/${GITHUB_PROJECT_NAME}/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf && \
